@@ -1,5 +1,12 @@
 local refresh_rate = 60
 
+local types = {
+	["storage-tank"] = true,
+	["boiler"] = true,
+	["pipe"] = true,
+	["pipe-to-ground"] = true
+}
+
 local look_offset = 0.5
 local look_distance = 1
 local tank_surroundings_check_distance = 2
@@ -19,7 +26,9 @@ local function get_tank(entity)
 		area = {{position.x + look_distance - 0.1, position.y - look_offset}, {position.x + look_distance + 0.1, position.y + look_offset}}
 	end
 	
-	return entity.surface.find_entities_filtered{area = area, type = "storage-tank"}[1]
+	for i, v in pairs(entity.surface.find_entities(area)) do
+		if types[v.type] then return v end
+	end
 end
 
 local function find_in_global(combinator)
@@ -45,7 +54,7 @@ local function on_built(event)
 		entity.rotatable = true
 		table.insert(global.combinators[ei], {entity = entity, tank = get_tank(entity)})
 	end
-	if entity.type == "storage-tank" then
+	if types[entity.type] then
 		local area = {
 			{entity.position.x - tank_surroundings_check_distance, entity.position.y - tank_surroundings_check_distance},
 			{entity.position.x + tank_surroundings_check_distance, entity.position.y + tank_surroundings_check_distance}
@@ -96,7 +105,7 @@ local function on_destroyed(event)
 			end
 		end
 	end
-	if entity.type == "storage-tank" then
+	if types[entity.type] then
 		local area = {
 			{entity.position.x - tank_surroundings_check_distance, entity.position.y - tank_surroundings_check_distance},
 			{entity.position.x + tank_surroundings_check_distance, entity.position.y + tank_surroundings_check_distance}
