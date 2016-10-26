@@ -1,5 +1,8 @@
+##0.1.2##
+* Output is now multiplied by 100 to allow for more precision
+
 ##0.1.1##
-+Added support for boilers pipes and underground pipes
++ Added support for boilers pipes and underground pipes
 
 ##0.1.0##
 + Initial release
