@@ -70,7 +70,7 @@ local function on_tick(event)
 	for _, combinator in pairs(global.combinators[event.tick % refresh_rate]) do
 		local count = 0
 		if combinator.tank and combinator.tank.valid and combinator.tank.fluidbox[1] then
-			count = combinator.tank.fluidbox[1].temperature
+			count = combinator.tank.fluidbox[1].temperature * 100
 		end
 		combinator.entity.get_or_create_control_behavior().parameters = {
 			enabled = true,
