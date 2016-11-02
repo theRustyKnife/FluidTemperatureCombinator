@@ -1,4 +1,5 @@
 local refresh_rate = 60
+local gui_refresh_rate = 10
 
 local types = {
 	["storage-tank"] = true,
@@ -70,7 +71,9 @@ local function on_tick(event)
 	for _, combinator in pairs(global.combinators[event.tick % refresh_rate]) do
 		local count = 0
 		if combinator.tank and combinator.tank.valid and combinator.tank.fluidbox[1] then
-			count = combinator.tank.fluidbox[1].temperature * 100
+			local precision = 1
+			if combinator.precise then precision = 100 end
+			count = combinator.tank.fluidbox[1].temperature * precision
 		end
 		combinator.entity.get_or_create_control_behavior().parameters = {
 			enabled = true,
@@ -82,6 +85,21 @@ local function on_tick(event)
 				}
 			}
 		}
+	end
+	
+	for i = event.tick % gui_refresh_rate + 1, #game.players, gui_refresh_rate do
+		local player = game.players[i]
+		if player.opened and player.opened.name == "fluid-temperature-combinator" then
+			local combinator = find_in_global(player.opened)
+			if not player.gui.left["fluid-temperature-combinator-precise-toggle"] then
+				local state = true
+				if not combinator.precise then state = false end
+				player.gui.left.add{type = "checkbox", name = "fluid-temperature-combinator-precise-toggle", caption = {"precise-toggle"}, state = state}
+			end
+			combinator.precise = player.gui.left["fluid-temperature-combinator-precise-toggle"].state
+		elseif player.gui.left["fluid-temperature-combinator-precise-toggle"] then
+			player.gui.left["fluid-temperature-combinator-precise-toggle"].destroy()
+		end
 	end
 end
 
@@ -130,10 +148,18 @@ script.on_configuration_changed(function(data)
 		global.combinators[i] = global.combinators[i] or {}
 	end
 	
-	if data.mod_changes["crafting_combinator"] then
+	if data.mod_changes["fluid-temperature-combinator"] then
 		for _, force in pairs(game.forces) do
 			if force.technologies["circuit-network"].researched then
-				force.recipes["crafting-combinator"].enabled = true
+				force.recipes["fluid-temperature-combinator"].enabled = true
+			end
+		end
+		
+		if data.mod_changes["fluid-temperature-combinator"].old_version == "0.1.2" then
+			for _, tab in pairs(global.combinators) do
+				for i, v in pairs(tab) do
+					v.precise = true
+				end
 			end
 		end
 	end
