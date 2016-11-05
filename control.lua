@@ -110,6 +110,12 @@ local function on_rotated(event)
 	end
 end
 
+local function on_settings_pasted(event)
+	if event.source.name == "fluid-temperature-combinator" and event.destination.name == "fluid-temperature-combinator" then
+		find_in_global(event.destination).precise = find_in_global(event.source).precise
+	end
+end
+
 local function on_destroyed(event)
 	local entity = event.entity
 	
@@ -175,3 +181,5 @@ script.on_event(defines.events.on_entity_died, on_destroyed)
 script.on_event(defines.events.on_tick, on_tick)
 
 script.on_event(defines.events.on_player_rotated_entity, on_rotated)
+
+script.on_event(defines.events.on_entity_settings_pasted, on_settings_pasted)
