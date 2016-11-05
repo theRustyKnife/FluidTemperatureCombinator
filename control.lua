@@ -95,9 +95,20 @@ local function on_tick(event)
 				local state = true
 				if not combinator.precise then state = false end
 				player.gui.left.add{type = "checkbox", name = "fluid-temperature-combinator-precise-toggle", caption = {"precise-toggle"}, state = state}
+				
+				global.open_combinators[player.index] = state
 			end
-			combinator.precise = player.gui.left["fluid-temperature-combinator-precise-toggle"].state
+			
+			local state = player.gui.left["fluid-temperature-combinator-precise-toggle"].state
+			if state == global.open_combinators[player.index] and state ~= combinator.precise then
+				player.gui.left["fluid-temperature-combinator-precise-toggle"].state = combinator.precise
+			else
+				combinator.precise = player.gui.left["fluid-temperature-combinator-precise-toggle"].state
+			end
+			
+			global.open_combinators[player.index] = combinator.precise
 		elseif player.gui.left["fluid-temperature-combinator-precise-toggle"] then
+			global.open_combinators[player.index] = nil
 			player.gui.left["fluid-temperature-combinator-precise-toggle"].destroy()
 		end
 	end
@@ -146,6 +157,7 @@ script.on_init(function()
 	for i = 0, refresh_rate - 1 do
 		global.combinators[i] = global.combinators[i] or {}
 	end
+	global.open_combinators = global.open_combinators or {}
 end)
 
 script.on_configuration_changed(function(data)
@@ -153,6 +165,7 @@ script.on_configuration_changed(function(data)
 	for i = 0, refresh_rate - 1 do
 		global.combinators[i] = global.combinators[i] or {}
 	end
+	global.open_combinators = global.open_combinators or {}
 	
 	if data.mod_changes["fluid-temperature-combinator"] then
 		for _, force in pairs(game.forces) do
