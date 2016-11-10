@@ -3,7 +3,7 @@ local name = "fluid-temperature-combinator"
 local entity = util.table.deepcopy(data.raw["constant-combinator"]["constant-combinator"])
 entity.name = name
 entity.minable.result = name
-entity.item_slot_count = 1
+entity.item_slot_count = 2
 
 local item = util.table.deepcopy(data.raw["item"]["constant-combinator"])
 item.name = name

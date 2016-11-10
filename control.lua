@@ -5,12 +5,13 @@ local types = {
 	["storage-tank"] = true,
 	["boiler"] = true,
 	["pipe"] = true,
-	["pipe-to-ground"] = true
+	["pipe-to-ground"] = true,
+	["generator"] = true,
 }
 
 local look_offset = 0.5
 local look_distance = 1
-local tank_surroundings_check_distance = 2
+local tank_surroundings_check_distance = 5
 local function get_tank(entity)
 	local position = entity.position
 	local direction = entity.direction
@@ -68,13 +69,23 @@ local function on_built(event)
 end
 
 local function on_tick(event)
+	-- entity update
 	for _, combinator in pairs(global.combinators[event.tick % refresh_rate]) do
 		local count = 0
+		local fluid
 		if combinator.tank and combinator.tank.valid and combinator.tank.fluidbox[1] then
+			local fluidbox = combinator.tank.fluidbox[1]
 			local precision = 1
 			if combinator.precise then precision = 100 end
-			count = combinator.tank.fluidbox[1].temperature * precision
+			count = fluidbox.temperature * precision
+			
+			fluid = {
+				signal = {type = "fluid", name = fluidbox.type},
+				count = math.floor(fluidbox.amount),
+				index = 2
+			}
 		end
+		
 		combinator.entity.get_or_create_control_behavior().parameters = {
 			enabled = true,
 			parameters = {
@@ -82,11 +93,13 @@ local function on_tick(event)
 					signal = {type = "virtual", name = "fluid-temperature"},
 					count = math.floor(count),
 					index = 1
-				}
+				},
+				fluid
 			}
 		}
 	end
 	
+	-- GUI update
 	for i = event.tick % gui_refresh_rate + 1, #game.players, gui_refresh_rate do
 		local player = game.players[i]
 		if player.opened and player.opened.name == "fluid-temperature-combinator" then
