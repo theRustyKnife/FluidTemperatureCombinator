@@ -1,3 +1,6 @@
+##0.3.0##
+* Updated for Factorio 0.15
+
 ##0.2.0##
 + Added fluid content to output
 + Added support for generators
